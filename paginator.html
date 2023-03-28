@@ -1,0 +1,81 @@
+<html>
+<head>
+
+</head>
+<body>
+    <script>
+class Paginator{
+        constructor(data, size) {
+                    this.data = data;
+                    this.pageSize = size;
+                    this.currentPageId = 0;
+                }
+    showPageOfId(id){
+                id = Math.floor(id)
+                this.currentPageId = id;
+                let res=[];
+            
+                let numElementsOnPage = this.findNumElementsOnPage(id);
+                let i0 = this.pageSize *id;
+                for (let i = i0; i<i0+numElementsOnPage; i++ ){
+                    res.push(this.data[i])
+                    }
+        return res;
+    }
+
+    showNexPage(){
+        if(this.currentPageId>=this.pageSize){ 
+            return this.showPageOfId(this.currentPageId)
+        }
+       return this.showPageOfId(this.currentPageId+1)
+    }
+
+    showPrePage(){
+        if(this.currentPageId==0){
+            return this.showPageOfId(this.currentPageId)
+    } else {return this.showPageOfId(this.currentPageId-1) }
+    }
+
+    setNewPageSize(size){
+        size = Math.floor(size)
+            this.pageSize = size;
+        }
+    findNumElementsOnPage(id){
+       
+            if((id+1) * this.pageSize-1<this.data.length){
+                return this.pageSize;
+                } else {
+                    if (id*this.pageSize<this.data.length) {                  
+                    return this.data.length % this.pageSize;
+                     } else{
+                            return 0;
+                        }
+                
+            }
+        
+        }
+}
+let pg = new Paginator(["A", "B", "C", "D", "E", "F", "G", "C", "S", "Q", "W", "R", "T"], 3);
+console.log(pg.showPageOfId(0))
+pg.setNewPageSize(3);
+console.log(pg.showNexPage())
+console.log(pg.showNexPage())
+console.log(pg.showPrePage())
+console.log(pg.showPrePage())
+console.log(pg.showPrePage())
+console.log(pg.showPrePage())
+console.log(pg.showNexPage())
+console.log(pg.showNexPage())
+console.log(pg.showNexPage())
+console.log(pg.showNexPage())
+console.log(pg.showNexPage())
+console.log(pg.showNexPage())
+
+
+    </script>
+
+
+
+</body>
+
+</html>

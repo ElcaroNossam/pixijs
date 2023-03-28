@@ -1,0 +1,33 @@
+<html>
+    <head>
+
+    </head>
+
+    <body>
+        <script>
+                function result(n) {
+                    zero = 0;
+                    for(let a = 0; a<=n; a++) {
+                        zero +=a
+                    }
+                    return zero;
+                }
+                console.log(result(1000000))
+            
+
+            function result2(x, y) {
+                let min = Math.min(x, y);
+                let sum = 0;
+                for(let i = 1; i<=min; i++) {
+                    
+                    let sub = ((x - i) + 1) * ((y - i) + 1);
+                    
+                    sum += sub;
+                   
+                } 
+                return sum;
+            }
+            console.log(result2(100, 1000))
+        </script>
+    </body>
+</html>

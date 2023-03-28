@@ -1,0 +1,92 @@
+<html>
+    <head>
+        <script src="pixi.js"></script>
+    </head>
+<body>
+    <script>
+        class MovingObject extends PIXI.Container {
+            constructor(x, y, c, v) {
+                super();
+                this.x = x;
+                this.y = y;
+                this.course = c;
+                this.speed = v;
+
+                this.turnSpeed = 0.1;
+                this.targetCourse = this.course;
+
+                this.image = PIXI.Sprite.from('img1.png');
+                this.image.anchor.set(0.5, 0.5);
+                this.addChild(this.image);
+            }
+            step(dt){
+
+                let dPhi = this.targetCourse-this.course;
+                if (dPhi !=0 ) {
+                    if(dPhi>Math.PI){
+                        dPhi -=2*Math.PI
+                    }
+                    if(dPhi<-Math.PI){
+                        dPhi +=2*Math.PI
+                    }
+
+
+                    let maxTurn = this.turnSpeed*dt;
+
+                    if (Math.abs(dPhi) <= maxTurn){
+                        this.course = this.targetCourse;
+                    } else {
+                        this.course +=maxTurn*Math.sign(dPhi);
+                    }
+                }
+
+                let vx = this.speed*Math.sin(this.course);
+                let vy = -this.speed*Math.cos(this.course);
+
+                this.x+=vx*dt;
+                this.y+=vy*dt;
+
+                this.rotation = this.course;
+            }
+
+            move2Point(x1, y1) {
+                let dx = x1 -this.x;
+                let dy = y1-this.y;
+                let phi = Math.atan2(dx, -dy);
+                this.targetCourse = phi;
+
+            }
+
+        }
+                let mouseX = 0;
+                let mouseY = 0;
+
+                let app = new PIXI.Application({width: 640, height: 360})
+                document.body.appendChild(app.view);
+                app.stage.interactive = true;
+                app.stage.hitArea = app.screen;
+                app.stage.addEventListener('pointermove', (e) => {
+                    mouseX = e.global.x
+                    mouseY = e.global.y
+                });
+
+            let objects = new Array();
+
+            for(let i = 0; i < 10; i++){
+              let movingObject = new MovingObject(Math.random() * 640, Math.random() * 360, Math.random() * Math.PI * 2, 2);
+              app.stage.addChild(movingObject);
+              objects.push(movingObject);
+            }
+
+        function update(dt){
+                for(let i = 0; i < objects.length; i++){
+                  let obj = objects[i];
+                  obj.step(dt);
+                  obj.move2Point(mouseX, mouseY);
+                }
+        }
+        app.ticker.add(update);
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<html>
+    <head>
+        <script src="pixi.js"></script>
+    </head>
+<body>
+    <script>
+       class World {
+    constructor(stage){
+        this.stage = stage;
+        this.objects = [];
+
+        this.mouseX = 0;
+        this.mouseY = 0;
+    }
+
+    step(dt){
+        for(let i=0; i<this.objects.length; i++){
+            let obj = this.objects[i];
+            obj.step(dt);
+            obj.makeDecision();
+        }
+    }
+
+    
+    createMovingObject(x,y,c,v){
+        let movingObject = new MovingObject(x,y,c,v);
+        this.stage.addChild(movingObject);
+        this.objects.push(movingObject);
+    }
+    createPlayer(x,y) {
+        this.player = new Player(x,y);
+        this.stage.addChild(this.player);
+        this.objects.push(this.player);
+    }
+    createEnemy(x,y) {
+        
+
+        let enemy = new Enemy(x,y);
+        this.stage.addChild(enemy);
+        this.objects.push(enemy);
+        
+    }
+    handleMove(e){
+        this.mouseX = e.global.x;
+        this.mouseY = e.global.y;
+    }
+}
+
+
+
+
+class MovingObject extends PIXI.Container{
+  
+    constructor(x, y, c, v){
+        super();
+        this.x = x;
+        this.y = y;
+        this.course = c;
+        this.speed = v;
+        this.turnSpeed = 0.1;
+        this.TargetCourse = this.course;
+
+        this.image = PIXI.Sprite.from('img1.png');
+        this.image.anchor.set(0.5,0.5);
+        this.addChild(this.image);
+    }
+
+        step(dt){
+            
+            let dPhi = this.TargetCourse-this.course;
+            if(dPhi!=0){
+                if(dPhi>Math.PI){
+                    dPhi -= 2*Math.PI;
+                }
+                if(dPhi<-Math.PI){
+                    dPhi += 2*Math.PI;
+                }
+                let MaxTurn = this.turnSpeed*dt;
+                if (Math.abs(dPhi)<=MaxTurn){
+                    this.course = this.TargetCourse;
+                }
+                else{
+                    this.course+=MaxTurn*Math.sign(dPhi);
+                }
+            }
+        
+        
+        
+        
+        
+        let vx = this.speed*Math.sin(this.course);
+        let vy = -this.speed*Math.cos(this.course);
+
+        this.x+=vx*dt;
+        this.y+=vy*dt;
+
+        this.rotation = this.course;
+    }
+
+    move2Point(x1, y1){
+        let dx = x1 - this.x;
+        let dy = y1 - this.y;
+        let phi = Math.atan2(dx, -dy);
+
+        this.TargetCourse = phi;
+    }
+    makeDecision(){
+
+    }
+}
+
+function restartGame() {
+  // перезагрузка страницы
+  location.reload();
+}
+    
+class Player extends MovingObject{
+    constructor(x, y) {
+        super(x, y, 0, 3)
+        this.image.tint = 0x00ff00
+    }
+    makeDecision(){
+        this.move2Point(world.mouseX, world.mouseY);
+    }
+}
+
+class Enemy extends MovingObject {
+    constructor(x, y) {
+        super(x, y, 0, 1 + Math.random());
+        this.image.tint = 0xff0000;
+        this.minDistance = 100; // минимальное расстояние до других врагов
+    }
+
+    makeDecision() {
+        // движение к игроку
+        this.move2Point(world.player.x, world.player.y);
+        
+        // проверка на столкновение с другими врагами
+        for (let i = 0; i < world.objects.length; i++) {
+            let obj = world.objects[i];
+            if (obj instanceof Enemy && obj !== this) {
+                let dx = obj.x - this.x;
+                let dy = obj.y - this.y;
+                let distance = Math.sqrt(dx*dx + dy*dy);
+                if (distance < this.minDistance) {
+                    // если расстояние до другого врага меньше минимального,
+                    // то изменяем направление движения на противоположное
+                    let phi = Math.atan2(dx, -dy) + Math.PI;
+                    this.TargetCourse = phi;
+                    break;
+                }
+            }
+
+        }
+
+        for (let i = 0; i < world.objects.length; i++) {
+            let obj = world.objects[i];
+            if (obj instanceof Player && obj == this) {
+                let dx = obj.x - this.x;
+                let dy = obj.y - this.y;
+                let distance = Math.sqrt(dx*dx + dy*dy);
+                if (distance < this.minDistance) {
+                    // если расстояние до другого врага меньше минимального,
+                    // то изменяем направление движения на противоположное
+                    let phi = Math.atan2(dx, -dy) + Math.PI;
+                    this.TargetCourse = phi;
+                    break;
+                }
+            }
+
+        }
+    }
+}
+
+
+let mouseX = 0;
+let mouseY = 0;
+
+let app = new PIXI.Application({ width:1920, height:1080});
+document.body.appendChild(app.view);
+let world = new World(app.stage)
+
+app.stage.interactive = true;
+app.stage.hitArea = app.screen;
+app.stage.addEventListener('pointermove', (e) => {
+    world.handleMove(e);
+});
+
+//world.createMovingObject(250, 320, 0, Math.random()*10);
+//let sprite = PIXI.Sprite.from('img1.png');
+//app.stage.addChild(sprite);
+
+
+
+
+//let movingObject = new MovingObject(250, 320, Math.PI/2, 2)
+//app.stage.addChild(movingObject)
+world.createPlayer(250, 100);
+world.createEnemy(20, 100);
+world.createEnemy(20, 100);
+world.createEnemy(20, 100);
+
+function update(dt){
+     world.step(dt);
+   
+}
+
+
+
+app.ticker.add(update)
+
+
+    </script>
+</body>
+    </html>
